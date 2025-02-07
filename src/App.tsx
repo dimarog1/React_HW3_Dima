@@ -1,63 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import ProductList from './components/ProductList';
-
-type Product = {
-    name: string;
-    description: string;
-    category: string;
-    quantity: number;
-    unit: string;
-    imageUrl?: string;
-};
-
-interface Filters {
-    name: string;
-    category: string;
-    nonZeroQuantity: boolean;
-}
+import UserProfile from './components/UserProfile';
+import ProductDetails from './components/ProductDetails';
+import CategoriesPage from './components/CategoriesPage';
+import { setInitialProducts } from './slices/productsSlice';
+import { addCategory } from './slices/categoriesSlice';
 
 const App: React.FC = () => {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const initialProducts = [
+            { id: '1', name: 'Product A', description: 'Description for Product A', category: 'Category A', quantity: 10, price: 100, unit: 'kg', imageUrl: 'https://via.placeholder.com/150' },
+            { id: '2', name: 'Product B', description: 'Description for Product B', category: 'Category B', quantity: 5, price: 200, unit: 'pcs', imageUrl: 'https://via.placeholder.com/150' },
+            { id: '3', name: 'Product C', description: 'Description for Product C', category: 'Category C', quantity: 8, price: 150, unit: 'liters', imageUrl: 'https://via.placeholder.com/150' },
+        ];
+        dispatch(setInitialProducts(initialProducts));
+        const uniqueCategories = new Set(initialProducts.map(product => product.category));
+        uniqueCategories.forEach(category => dispatch(addCategory(category)));
+    }, [dispatch]);
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [filters, setFilters] = useState<Filters>({ name: '', category: '', nonZeroQuantity: false });
-    const [products] = useState<Product[]>([
-        { name: 'Product A', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', category: 'Category A', quantity: 1, unit: 'lb', imageUrl: 'https://bee-master.ru/wp-content/uploads/5/7/a/57a3da20da775e5e93c496b3192fe631.jpeg' },
-        { name: 'Product B', description: 'Lorem ipsum dolor sit amet.', category: 'Category B', quantity: 10, unit: 'kg', imageUrl: '' },
-        { name: 'Product C', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 5, unit: 'l', imageUrl: '' },
-        { name: 'Product D', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product D', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 5, unit: 'l', imageUrl: '' },
-        { name: 'Product E', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product E', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product E', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product F', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 5, unit: 'l', imageUrl: '' },
-        { name: 'Product F', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product F', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 0, unit: 'l', imageUrl: '' },
-        { name: 'Product F', description: 'Lorem ipsum dolor sit amet.', category: 'Category C', quantity: 5, unit: 'l', imageUrl: '' },
-    ]);
+    const [filters, setFilters] = useState({ name: '', category: '', nonZeroQuantity: false });
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const handleApplyFilters = (newFilters: Filters) => {
+    const handleApplyFilters = (newFilters: { name: string; category: string; nonZeroQuantity: boolean }) => {
         setFilters(newFilters);
         setIsSidebarOpen(false);
     };
 
-    const filteredProducts = products.filter((product) => {
-        const nameMatch = new RegExp(filters.name, 'i').test(product.name);
-        const categoryMatch = filters.category ? product.category === filters.category : true;
-        const quantityMatch = filters.nonZeroQuantity ? product.quantity > 0 : true;
-        return nameMatch && categoryMatch && quantityMatch;
-    });
-
     return (
-        <div>
+        <>
             <Navbar toggleSidebar={toggleSidebar} />
             <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} onApplyFilters={handleApplyFilters} />
-            <ProductList products={filteredProducts} />
-        </div>
+            <Routes>
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/" element={<ProductList filters={filters} />} />
+            </Routes>
+        </>
     );
 };
 

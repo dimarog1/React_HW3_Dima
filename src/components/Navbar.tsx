@@ -1,6 +1,7 @@
 import React from 'react';
-import { AppBar, Toolbar, Button, IconButton, styled } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Button, styled } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Link } from 'react-router-dom';
 
 interface NavbarProps {
     toggleSidebar: () => void;
@@ -23,10 +24,18 @@ const StyledAppBar = styled(AppBar)(() => ({
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => (
     <StyledAppBar position="static">
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
-            <Button color="inherit" href="#">Товары</Button>
-            <Button color="inherit" href="#">Склады</Button>
-            <Button color="inherit" href="#">О системе</Button>
-            <Button color="inherit" href="#">Личная страница</Button>
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Button color="inherit">Products</Button>
+            </Link>
+            <Link to="/categories" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Button color="inherit">Categories</Button>
+            </Link>
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Button color="inherit">About</Button>
+            </Link>
+            <Link to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Button color="inherit">Profile</Button>
+            </Link>
             <IconButton edge="end" color="inherit" onClick={toggleSidebar}>
                 <MenuIcon />
             </IconButton>

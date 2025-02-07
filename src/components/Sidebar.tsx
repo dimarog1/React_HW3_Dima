@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 import { Drawer, TextField, FormControlLabel, Checkbox, Select, MenuItem, Button, IconButton, styled, SelectChangeEvent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -27,6 +29,8 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
 }));
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) => {
+    const categories = useSelector((state: RootState) => state.categories.categories);
+    const uniqueCategories = Array.from(new Set(categories.map(category => category.name)));
     const [filters, setFilters] = useState<Filters>({ name: '', category: '', nonZeroQuantity: false });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) =>
         setFilters({ ...filters, nonZeroQuantity: e.target.checked });
     };
 
-    const handleApplyFilters = () => {
+    const handleApplyFiltersClick = () => {
         onApplyFilters(filters);
         onClose();
     };
@@ -61,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) =>
         <StyledDrawer anchor="right" open={isOpen} onClose={onClose} variant="persistent">
             <div>
                 <TextField
-                    label="Название товара"
+                    label="Name"
                     variant="outlined"
                     fullWidth
                     name="name"
@@ -78,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) =>
                 />
                 <FormControlLabel
                     control={<Checkbox checked={filters.nonZeroQuantity} onChange={handleCheckboxChange} />}
-                    label="Ненулевое количество"
+                    label="In stock"
                     sx={{ marginBottom: 2 }}
                 />
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
@@ -87,12 +91,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) =>
                         value={filters.category}
                         onChange={handleSelectChange}
                         displayEmpty
-                        renderValue={(selected) => (selected ? selected : 'Выберите категорию')}
+                        renderValue={(selected) => (selected ? selected : 'Choose category')}
                     >
-                        <MenuItem value="">Выберите категорию</MenuItem>
-                        <MenuItem value="Category A">Category A</MenuItem>
-                        <MenuItem value="Category B">Category B</MenuItem>
-                        <MenuItem value="Category C">Category C</MenuItem>
+                        <MenuItem value="">Choose category</MenuItem>
+                        {uniqueCategories.map((categoryName) => (
+                            <MenuItem key={categoryName} value={categoryName}>
+                                {categoryName}
+                            </MenuItem>
+                        ))}
                     </Select>
                     {filters.category && (
                         <IconButton onClick={() => handleResetField('category')}>
@@ -100,11 +106,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onApplyFilters }) =>
                         </IconButton>
                     )}
                 </div>
-                <Button variant="contained" color="primary" fullWidth onClick={handleApplyFilters} sx={{ marginBottom: 2 }}>
-                    Применить фильтры
+                <Button variant="contained" color="primary" fullWidth onClick={handleApplyFiltersClick} sx={{ marginBottom: 2 }}>
+                    Apply
                 </Button>
                 <Button variant="outlined" color="secondary" fullWidth onClick={handleResetFilters}>
-                    Сбросить фильтры
+                    Reset
                 </Button>
             </div>
         </StyledDrawer>
